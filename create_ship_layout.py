@@ -1,4 +1,8 @@
 import random
+
+####################################################################
+######## creates DxD matrix with user's input ######################
+####################################################################
 def init():
     #d = input("Enter row or column size D?")
     #d = int(d)
@@ -13,6 +17,10 @@ def init():
     ship_map[random_row][random_col] = 1
     print(ship_map)
     return d, ship_map
+
+####################################################################
+######## creates the initial ship layout ###########################
+####################################################################
 
 def create_ship_layout(ship_map):
     row = len(ship_map)
@@ -45,6 +53,10 @@ def create_ship_layout(ship_map):
         ship_map[rand_row][rand_col] = 1
         exactly_one_open_neigbor = []
     return
+
+####################################################################
+######## open dead ends - open cells with one open neighbor ########
+####################################################################
 
 def open_dead_end(ship_map):
     row = len(ship_map)
@@ -92,14 +104,34 @@ def open_dead_end(ship_map):
             break
     return
 
-# init the 2D map of ship
-d, ship_map = init()
-create_ship_layout(ship_map)
-print("ship layout:")
-print(ship_map)
-open_dead_end(ship_map)
-print("ship layout after opening dead ends:")
-print(ship_map)
+####################################################################
+######## open unique cells for fire, bot and button  ###############
+####################################################################
+
+def create_bot_fire_button(ship_map):
+    print("create button!")
+    rand_row = random.randint(0, len(ship_map)-1)
+    rand_col = random.randint(0, len(ship_map[0])-1)
+    
+    while(ship_map[rand_row][rand_col] is not 1):
+        rand_row = random.randint(0, len(ship_map)-1)
+        rand_col = random.randint(0, len(ship_map[0])-1)  
+    bot_coord = (rand_row, rand_col)
+    
+    while((ship_map[rand_row][rand_col] == 0) or (bot_coord == (rand_row, rand_col))):
+        rand_row = random.randint(0, len(ship_map)-1)
+        rand_col = random.randint(0, len(ship_map[0])-1) 
+    button_coord = (rand_row, rand_col)
+    
+    while(ship_map[rand_row][rand_col] == 0 
+          or ((rand_row, rand_col) == bot_coord
+          or (rand_row, rand_col) == button_coord)):
+        rand_row = random.randint(0, len(ship_map)-1)
+        rand_col = random.randint(0, len(ship_map[0])-1)
+    fire_coord = (rand_row, rand_col)
+    print("bot @ ", bot_coord, " button @ ", button_coord, " fire @ ", fire_coord)
+    return
+
 
 
 
