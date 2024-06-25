@@ -1,4 +1,5 @@
 import random
+import math
 
 ####################################################################
 ######## creates DxD matrix with user's input ######################
@@ -6,6 +7,9 @@ import random
 def init():
     #d = input("Enter row or column size D?")
     #d = int(d)
+    #q = input("Enter q between 0 and 1, defining flammability of the ship?")
+    #q = input(q)
+    q = 0.5
     d = 5
     row, col = (d, d)
     ship_map = [[0 for i in range(col)] for j in range(row)]
@@ -16,7 +20,7 @@ def init():
     print(random_row, random_col)
     ship_map[random_row][random_col] = 1
     print(ship_map)
-    return d, ship_map
+    return d, ship_map, q
 
 ####################################################################
 ######## creates the initial ship layout ###########################
@@ -109,11 +113,10 @@ def open_dead_end(ship_map):
 ####################################################################
 
 def create_bot_fire_button(ship_map):
-    print("create button!")
     rand_row = random.randint(0, len(ship_map)-1)
     rand_col = random.randint(0, len(ship_map[0])-1)
     
-    while(ship_map[rand_row][rand_col] is not 1):
+    while(ship_map[rand_row][rand_col] != 1):
         rand_row = random.randint(0, len(ship_map)-1)
         rand_col = random.randint(0, len(ship_map[0])-1)  
     bot_coord = (rand_row, rand_col)
@@ -130,11 +133,43 @@ def create_bot_fire_button(ship_map):
         rand_col = random.randint(0, len(ship_map[0])-1)
     fire_coord = (rand_row, rand_col)
     print("bot @ ", bot_coord, " button @ ", button_coord, " fire @ ", fire_coord)
-    return
+    return bot_coord, button_coord, fire_coord
 
+def create_dist_matrix(ship_map, bot_coord, button_coord, fire_coord):
+    row = len(ship_map)
+    col = len(ship_map[0])
+    dist_matrix = [[0 for i in range(col)] for j in range(row)]
+    for i in range(row):
+        for j in range(col):
+            dist_matrix[i][j] = math.sqrt((button_coord[0]-i)*(button_coord[0]-i)+(button_coord[1]-j)*(button_coord[1]-j))
+    return dist_matrix
 
+def create_fire_matrix(ship_map, fire_coord):
+    row = len(ship_map)
+    col = len(ship_map[0])
+    fire_matrix = [[0 for i in range(col)] for j in range(row)]
+    fire_matrix[fire_coord[0]][fire_coord[1]] = 1
+    return fire_matrix
 
-
-
-
+def update_fire_matrix(ship_map, fire_matrix, q):
+    row = len(ship_map)
+    col = len(ship_map[0])
+    for i in range(row):
+        for j in range(col):
+            if(ship_map[i][j] == 1 and fire_matrix[i][j] == 0):
+                K = 0
+                if(i>0 and ship_map[i-1][j] == 1):
+                    if(fire_matrix[i-1][j] > 0):
+                        K += 1
+                if(j < col-1 and ship_map[i][j+1] == 1):
+                    if fire_matrix[i][j+1] > 0:
+                        K += 1
+                if(j > 0 and ship_map[i][j-1] == 1):
+                    if fire_matrix[i][j-1] > 0:
+                        K += 1
+                if(i < row-1 and ship_map[i+1][j] == 1 ):
+                    if fire_matrix[i+1][j] > 0:
+                        K += 1
+                        
+                fire_matrix[i][j] = 1-math.pow((1-q), K)
 
