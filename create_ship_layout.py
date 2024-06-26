@@ -1,16 +1,19 @@
 import random
 import math
+import copy
+import sys
+from utility import neighbor_weight
 
 ####################################################################
 ######## creates DxD matrix with user's input ######################
 ####################################################################
-def init():
+def init(d, q):
     #d = input("Enter row or column size D?")
     #d = int(d)
     #q = input("Enter q between 0 and 1, defining flammability of the ship?")
-    #q = input(q)
-    q = 0.5
-    d = 5
+    #q = float(q)
+    # Check if the correct number of command-line arguments is provided
+    
     row, col = (d, d)
     ship_map = [[0 for i in range(col)] for j in range(row)]
     print(ship_map)
@@ -20,7 +23,7 @@ def init():
     print(random_row, random_col)
     ship_map[random_row][random_col] = 1
     print(ship_map)
-    return d, ship_map, q
+    return ship_map
 
 ####################################################################
 ######## creates the initial ship layout ###########################
@@ -147,29 +150,65 @@ def create_dist_matrix(ship_map, bot_coord, button_coord, fire_coord):
 def create_fire_matrix(ship_map, fire_coord):
     row = len(ship_map)
     col = len(ship_map[0])
-    fire_matrix = [[0 for i in range(col)] for j in range(row)]
+    fire_matrix = [[0.0 for i in range(col)] for j in range(row)]
     fire_matrix[fire_coord[0]][fire_coord[1]] = 1
     return fire_matrix
 
 def update_fire_matrix(ship_map, fire_matrix, q):
     row = len(ship_map)
     col = len(ship_map[0])
+    new_fire_matrix = copy.deepcopy(fire_matrix)
+    #print("new fire matrix")
+    #print(new_fire_matrix)
+
+    #print("incoming fire matrix")
+    #print(fire_matrix)
+
+    #print("ship map")
+    #print(ship_map)
+
     for i in range(row):
         for j in range(col):
-            if(ship_map[i][j] == 1 and fire_matrix[i][j] == 0):
+            if(ship_map[i][j] == 1 and fire_matrix[i][j] == 0.0):
                 K = 0
-                if(i>0 and ship_map[i-1][j] == 1):
+                if(i>0 and (ship_map[i-1][j] == 1 or ship_map[i-1][j] == -1)):
+                    #print("fire_matrix[i-1][j]", fire_matrix[i-1][j])
                     if(fire_matrix[i-1][j] > 0):
                         K += 1
-                if(j < col-1 and ship_map[i][j+1] == 1):
+                if(j < col-1 and (ship_map[i][j+1] == 1 or ship_map[i][j+1] == -1 )):
+                    #print("fire_matrix[i][j+1]", fire_matrix[i][j+1])
                     if fire_matrix[i][j+1] > 0:
                         K += 1
-                if(j > 0 and ship_map[i][j-1] == 1):
+                if(j > 0 and (ship_map[i][j-1] == 1 or ship_map[i][j-1] == -1)):
+                    #print("fire_matrix[i][j-1]", fire_matrix[i][j-1])
                     if fire_matrix[i][j-1] > 0:
                         K += 1
-                if(i < row-1 and ship_map[i+1][j] == 1 ):
+                if(i < row-1 and (ship_map[i+1][j] == 1 or ship_map[i+1][j] == -1)):
+                    #print("fire_matrix[i+1][j]", fire_matrix[i+1][j])
                     if fire_matrix[i+1][j] > 0:
-                        K += 1
-                        
-                fire_matrix[i][j] = 1-math.pow((1-q), K)
+                        K += 1 
+                #print("K: ", K)
+                new_fire_matrix[i][j] = 1-math.pow((1-q), K)
+                #print("fire_matrix[", i,"][", j, "] = ", fire_matrix[i][j])
+    fire_matrix = new_fire_matrix
+    #print("update fire matrix")
+    #for i in range(0, len(fire_matrix)):
+        #print(fire_matrix[i])
+    return fire_matrix
 
+def get_adj_fire_cell_weight(ship_map, fire_matrix, rows, cols, i, j):
+    total_neighbor_fire_weight = 0
+    d = len(ship_map)
+    if(i>0):
+        if ship_map[i-1][j] == 1 :
+            total_neighbor_fire_weight += neighbor_weight(d)*fire_matrix[i-1][j]
+    if(j < cols-1):
+        if ship_map[i][j+1] == 1:
+            total_neighbor_fire_weight += neighbor_weight(d)*fire_matrix[i][j+1]
+    if(j > 0):
+        if ship_map[i][j-1] == 1:
+            total_neighbor_fire_weight += neighbor_weight(d)*fire_matrix[i][j-1]
+    if(i < rows-1):
+        if ship_map[i+1][j] == 1:
+            total_neighbor_fire_weight += neighbor_weight(d)*fire_matrix[i+1][j]
+    return total_neighbor_fire_weight
