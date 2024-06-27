@@ -142,7 +142,7 @@ def create_dist_matrix(ship_map, bot_coord, button_coord, fire_coord):
     dist_matrix = [[0 for i in range(col)] for j in range(row)]
     for i in range(row):
         for j in range(col):
-            dist_matrix[i][j] = round(math.sqrt((button_coord[0]-i)*(button_coord[0]-i)+(button_coord[1]-j)*(button_coord[1]-j)),2)
+            dist_matrix[i][j] = round(abs(button_coord[0]-i)+abs(button_coord[1]-j),2)#manhattan distance
     return dist_matrix
 
 def create_fire_matrix(ship_map, fire_coord):
@@ -194,19 +194,24 @@ def update_fire_matrix(ship_map, fire_matrix, q):
         #print(fire_matrix[i])
     return fire_matrix
 
-def get_adj_fire_cell_weight(ship_map, fire_matrix, rows, cols, i, j):
-    total_neighbor_fire_weight = 0
+def get_fire_neighbors(ship_map, fire_matrix, rows, cols, i, j):
+    total_fire_neighbors = 0
+    combined_prob = 1/5*fire_matrix[i][j]
     d = len(ship_map)
     if(i>0):
-        if ship_map[i-1][j] == 1 :
-            total_neighbor_fire_weight += neighbor_weight(d)*fire_matrix[i-1][j]
+        if fire_matrix[i-1][j] > 0 :
+            total_fire_neighbors += 1
+            combined_prob += 1/5*fire_matrix[i-1][j]
     if(j < cols-1):
-        if ship_map[i][j+1] == 1:
-            total_neighbor_fire_weight += neighbor_weight(d)*fire_matrix[i][j+1]
+        if fire_matrix[i][j+1] > 0:
+            total_fire_neighbors += 1
+            combined_prob += 1/5*fire_matrix[i][j+1]
     if(j > 0):
-        if ship_map[i][j-1] == 1:
-            total_neighbor_fire_weight += neighbor_weight(d)*fire_matrix[i][j-1]
+        if fire_matrix[i][j-1] > 0:
+            total_fire_neighbors += 1
+            combined_prob += 1/5*fire_matrix[i][j-1]
     if(i < rows-1):
-        if ship_map[i+1][j] == 1:
-            total_neighbor_fire_weight += neighbor_weight(d)*fire_matrix[i+1][j]
-    return total_neighbor_fire_weight
+        if fire_matrix[i+1][j] > 0:
+            total_fire_neighbors += 1
+            combined_prob += 1/5*fire_matrix[i+1][j]
+    return total_fire_neighbors, combined_prob
