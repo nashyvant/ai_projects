@@ -26,7 +26,7 @@ q = float(sys.argv[2])
 
 ship_map = init(d, q)
 create_ship_layout(ship_map)
-print("ship layout:")
+#print("ship layout:")
 #for i in range(0, len(ship_map)):
     #print(ship_map[i])
 open_dead_end(ship_map)
@@ -45,10 +45,11 @@ cols = len(ship_map[0])
     
 def run_bot1(ship_map, bot_coord, button_coord, fire_coord, dist_matrix, rows, cols):
     fire_matrix = create_fire_matrix(ship_map, fire_coord)
-    myheap = [(0, bot_coord)]
+    myheap = [(dist_matrix[bot_coord[0]][bot_coord[1]], bot_coord)]
     while len(myheap) > 0:
         curr_cell = heapq.heappop(myheap)
         print("bot1 moves to:", curr_cell)
+        myheap = []
         if(fire_matrix[curr_cell[1][0]][curr_cell[1][1]] != 0):
             print("bot and fire in the same cell. Mission fails!")
             return "false"
@@ -57,32 +58,32 @@ def run_bot1(ship_map, bot_coord, button_coord, fire_coord, dist_matrix, rows, c
             return "true"
         i = curr_cell[1][0]
         j = curr_cell[1][1]
-        
+        print("processing i:", i, "j: ", j)
         fire_matrix = update_fire_matrix(ship_map, fire_matrix, q)
         print("fire matrix")
-        for i in range(0, len(fire_matrix)):
-            print(fire_matrix[i])
-
-        if(i>0):
-            if ship_map[i-1][j] == 1 : #ignores initial fire cell
+        for f in range(0, len(fire_matrix)):
+            print(fire_matrix[f])
+        if(i> 0 and ship_map[i-1][j] == 1) : #ignores initial fire cell
                 heapq.heappush(myheap, (dist_matrix[i-1][j], (i-1, j)))
-        if(j < cols-1):
-            if ship_map[i][j+1] == 1 : #ignores initial fire cell
+        if(j < cols-1 and ship_map[i][j+1] == 1) : #ignores initial fire cell
                 heapq.heappush(myheap, (dist_matrix[i][j+1], (i, j+1)))
-        if(j > 0):
-            if ship_map[i][j-1] == 1 : #ignores initial fire cell
+        if(j > 0 and ship_map[i][j-1] == 1 ): #ignores initial fire cell
                 heapq.heappush(myheap, (dist_matrix[i][j-1], (i, j-1)))
-        if(i < rows-1):
-            if ship_map[i+1][j] == 1 : #ignores initial fire cell
+        if(i < rows-1 and ship_map[i+1][j] == 1 ) : #ignores initial fire cell
                 heapq.heappush(myheap, (dist_matrix[i+1][j], (i+1, j)))
+        # Print the contents of the heap to verify
+        print("Heap contents:")
+        for item in myheap:
+            print(item)
     return "false"
 
 def run_bot2(ship_map, bot_coord, button_coord, fire_coord, dist_matrix, rows, cols):
     fire_matrix = create_fire_matrix(ship_map, fire_coord)
-    myheap = [(0, bot_coord)]
+    myheap = [(dist_matrix[bot_coord[0]][bot_coord[1]], bot_coord)]
     while len(myheap) > 0:
         curr_cell = heapq.heappop(myheap)
         print("bot2 moves to:", curr_cell)
+        myheap = []
         if(fire_matrix[curr_cell[1][0]][curr_cell[1][1]] != 0):
             print("bot and fire in the same cell. Mission fails!")
             return "false"
@@ -94,29 +95,39 @@ def run_bot2(ship_map, bot_coord, button_coord, fire_coord, dist_matrix, rows, c
         
         fire_matrix = update_fire_matrix(ship_map, fire_matrix, q)
         print("fire matrix")
-        for i in range(0, len(fire_matrix)):
-            print(fire_matrix[i])
+        for f in range(0, len(fire_matrix)):
+            print(fire_matrix[f])
 
-        if(i>0):
-            if(ship_map[i-1][j] == 1 ):
-                heapq.heappush(myheap, (dist_matrix[i-1][j]+(weight(d)*fire_matrix[i-1][j]), (i-1, j)))
-        if(j < cols-1):
-            if ship_map[i][j+1] == 1:
-                heapq.heappush(myheap, (dist_matrix[i][j+1]+(weight(d)*fire_matrix[i][j+1]), (i, j+1)))
-        if(j > 0):
-            if ship_map[i][j-1] == 1:
-                heapq.heappush(myheap, (dist_matrix[i][j-1]+(weight(d)*fire_matrix[i][j-1]), (i, j-1)))
-        if(i < rows-1):
-            if ship_map[i+1][j] == 1:
-                heapq.heappush(myheap, (dist_matrix[i+1][j]+(weight(d)*fire_matrix[i+1][j]), (i+1, j)))
+        if(i>0 and ship_map[i-1][j] == 1 ):
+            wt = round(dist_matrix[i-1][j]+(weight(d)*fire_matrix[i-1][j]), 2)
+            print("i-1: ", i-1," j: ", j, "dist_matrix: ", dist_matrix[i-1][j], "weight(d):", weight(d), "fire_matrix: ",  fire_matrix[i-1][j], "wt: ", wt)
+            heapq.heappush(myheap, (wt, (i-1, j)))
+        if(j < cols-1 and ship_map[i][j+1] == 1):
+            wt = round(dist_matrix[i][j+1]+(weight(d)*fire_matrix[i][j+1]), 2)
+            print("i: ", i," j+1: ", j+1, "dist_matrix: ", dist_matrix[i][j+1], "weight(d):", weight(d), "fire_matrix: ",  fire_matrix[i][j+1], "wt: ", wt)
+            heapq.heappush(myheap, (wt, (i, j+1)))
+        if(j > 0 and ship_map[i][j-1] == 1):
+            wt = round(dist_matrix[i-1][j]+(weight(d)*fire_matrix[i][j-1]), 2)
+            print("i: ", i," j-1: ", j-1, "dist_matrix: ", dist_matrix[i][j-1], "weight(d):", weight(d), "fire_matrix: ",  fire_matrix[i][j-1], "wt: ", wt)
+            heapq.heappush(myheap, (wt, (i, j-1)))
+        if(i < rows-1 and ship_map[i+1][j] == 1):
+            wt = round(dist_matrix[i+1][j]+(weight(d)*fire_matrix[i+1][j]), 2)
+            print("i+1: ", i+1," j: ", j, "dist_matrix: ", dist_matrix[i+1][j], "weight(d):", weight(d), "fire_matrix: ",  fire_matrix[i+1][j], "wt: ", wt)
+            heapq.heappush(myheap, (wt, (i+1, j)))
+        # Print the contents of the heap to verify
+        print("Heap contents:")
+        for item in myheap:
+            print(item)        
     return "false"
 
 def run_bot3(ship_map, bot_coord, button_coord, fire_coord, dist_matrix, rows, cols):
     fire_matrix = create_fire_matrix(ship_map, fire_coord)
-    myheap = [(0, bot_coord)]
+    myheap = [(dist_matrix[bot_coord[0]][bot_coord[1]], bot_coord)]
     while len(myheap) > 0:
         curr_cell = heapq.heappop(myheap)
         print("bot3 moves to:", curr_cell)
+        myheap = []
+        
         if(fire_matrix[curr_cell[1][0]][curr_cell[1][1]] != 0):
             print("bot and fire in the same cell. Mission fails!")
             return "false"
@@ -126,9 +137,10 @@ def run_bot3(ship_map, bot_coord, button_coord, fire_coord, dist_matrix, rows, c
         i = curr_cell[1][0]
         j = curr_cell[1][1]
         
+        fire_matrix = update_fire_matrix(ship_map, fire_matrix, q)
         print("fire matrix")
-        for i in range(0, len(fire_matrix)):
-            print(fire_matrix[i])
+        for f in range(0, len(fire_matrix)):
+            print(fire_matrix[f])
 
         if(i>0):
             if(ship_map[i-1][j] == 1 ):
@@ -146,7 +158,10 @@ def run_bot3(ship_map, bot_coord, button_coord, fire_coord, dist_matrix, rows, c
             if ship_map[i+1][j] == 1:
                 adj_cell_weight = get_adj_fire_cell_weight(ship_map, fire_matrix, rows, cols, i+1, j)
                 heapq.heappush(myheap, (dist_matrix[i+1][j]+(weight(d)*fire_matrix[i+1][j])+adj_cell_weight, (i+1, j)))
-        fire_matrix = update_fire_matrix(ship_map, fire_matrix, q)
+        # Print the contents of the heap to verify
+        print("Heap contents:")
+        for item in myheap:
+            print(item)    
     return "false"
 
 print("-----------------------------------------------------------------------------------------------")
@@ -163,5 +178,5 @@ print("bot2 mission:", mission_success_2)
 print("bot3 mission:", mission_success_3)
 
 # Open a file in append mode ('a')
-with open('output5.txt', 'a') as file:
+with open('out.txt', 'a') as file:
     file.write(f"q: {q:0.2f}, d: {d}, bot1: {mission_success_1}, bot2: {mission_success_2}, bot3: {mission_success_3}\n")

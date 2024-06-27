@@ -16,13 +16,11 @@ def init(d, q):
     
     row, col = (d, d)
     ship_map = [[0 for i in range(col)] for j in range(row)]
-    print(ship_map)
     # open a cell at random
     random_row = random.randint(0, d-1)
     random_col = random.randint(0, d-1)
-    print(random_row, random_col)
     ship_map[random_row][random_col] = 1
-    print(ship_map)
+    #print(ship_map)
     return ship_map
 
 ####################################################################
@@ -144,7 +142,7 @@ def create_dist_matrix(ship_map, bot_coord, button_coord, fire_coord):
     dist_matrix = [[0 for i in range(col)] for j in range(row)]
     for i in range(row):
         for j in range(col):
-            dist_matrix[i][j] = math.sqrt((button_coord[0]-i)*(button_coord[0]-i)+(button_coord[1]-j)*(button_coord[1]-j))
+            dist_matrix[i][j] = round(math.sqrt((button_coord[0]-i)*(button_coord[0]-i)+(button_coord[1]-j)*(button_coord[1]-j)),2)
     return dist_matrix
 
 def create_fire_matrix(ship_map, fire_coord):
@@ -188,7 +186,7 @@ def update_fire_matrix(ship_map, fire_matrix, q):
                     if fire_matrix[i+1][j] > 0:
                         K += 1 
                 #print("K: ", K)
-                new_fire_matrix[i][j] = 1-math.pow((1-q), K)
+                new_fire_matrix[i][j] = round(1 - math.pow((1 - q), K), 2)
                 #print("fire_matrix[", i,"][", j, "] = ", fire_matrix[i][j])
     fire_matrix = new_fire_matrix
     #print("update fire matrix")
