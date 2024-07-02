@@ -2,7 +2,8 @@ import random
 import math
 import copy
 import sys
-from utility import neighbor_weight
+#from utility import neighbor_weight
+from utility import sample_bit
 
 ####################################################################
 ######## creates DxD matrix with user's input ######################
@@ -148,7 +149,7 @@ def create_dist_matrix(ship_map, bot_coord, button_coord, fire_coord):
 def create_fire_matrix(ship_map, fire_coord):
     row = len(ship_map)
     col = len(ship_map[0])
-    fire_matrix = [[0.0 for i in range(col)] for j in range(row)]
+    fire_matrix = [[0 for i in range(col)] for j in range(row)]
     fire_matrix[fire_coord[0]][fire_coord[1]] = 1
     return fire_matrix
 
@@ -156,18 +157,10 @@ def update_fire_matrix(ship_map, fire_matrix, q):
     row = len(ship_map)
     col = len(ship_map[0])
     new_fire_matrix = copy.deepcopy(fire_matrix)
-    #print("new fire matrix")
-    #print(new_fire_matrix)
-
-    #print("incoming fire matrix")
-    #print(fire_matrix)
-
-    #print("ship map")
-    #print(ship_map)
 
     for i in range(row):
         for j in range(col):
-            if(ship_map[i][j] == 1 and fire_matrix[i][j] == 0.0):
+            if(ship_map[i][j] == 1 and fire_matrix[i][j] == 0):
                 K = 0
                 if(i>0 and (ship_map[i-1][j] == 1 or ship_map[i-1][j] == -1)):
                     #print("fire_matrix[i-1][j]", fire_matrix[i-1][j])
@@ -186,32 +179,65 @@ def update_fire_matrix(ship_map, fire_matrix, q):
                     if fire_matrix[i+1][j] > 0:
                         K += 1 
                 #print("K: ", K)
-                new_fire_matrix[i][j] = round(1 - math.pow((1 - q), K), 2)
+                curr_fire_probability = round(1 - math.pow((1 - q), K), 2)
                 #print("fire_matrix[", i,"][", j, "] = ", fire_matrix[i][j])
+                new_fire_matrix[i][j] = sample_bit(curr_fire_probability)
     fire_matrix = new_fire_matrix
-    #print("update fire matrix")
+    #print("updated fire matrix")
     #for i in range(0, len(fire_matrix)):
         #print(fire_matrix[i])
     return fire_matrix
 
+def simulate_fire_matrix(ship_map, fire_matrix, q, steps):
+    row = len(ship_map)
+    col = len(ship_map[0])
+    new_fire_matrix = copy.deepcopy(fire_matrix)
+
+    while(steps):
+        for i in range(row):
+            for j in range(col):
+                if(ship_map[i][j] == 1 and fire_matrix[i][j] == 0 ):
+                    K = 0
+                    if(i>0 and (ship_map[i-1][j] == 1 or ship_map[i-1][j] == -1)):
+                        #print("fire_matrix[i-1][j]", fire_matrix[i-1][j])
+                        if(fire_matrix[i-1][j] > 0):
+                            K += 1
+                    if(j < col-1 and (ship_map[i][j+1] == 1 or ship_map[i][j+1] == -1 )):
+                        #print("fire_matrix[i][j+1]", fire_matrix[i][j+1])
+                        if fire_matrix[i][j+1] > 0:
+                            K += 1
+                    if(j > 0 and (ship_map[i][j-1] == 1 or ship_map[i][j-1] == -1)):
+                        #print("fire_matrix[i][j-1]", fire_matrix[i][j-1])
+                        if fire_matrix[i][j-1] > 0:
+                            K += 1
+                    if(i < row-1 and (ship_map[i+1][j] == 1 or ship_map[i+1][j] == -1)):
+                        #print("fire_matrix[i+1][j]", fire_matrix[i+1][j])
+                        if fire_matrix[i+1][j] > 0:
+                            K += 1 
+                    #print("K: ", K)
+                    curr_fire_probability = round(1 - math.pow((1 - q), K), 2)
+                    #print("fire_matrix[", i,"][", j, "] = ", fire_matrix[i][j])
+                    new_fire_matrix[i][j] = sample_bit(curr_fire_probability)
+        fire_matrix = new_fire_matrix
+        steps -= 1
+        #print("simulate fire matrix")
+        #for i in range(0, len(fire_matrix)):
+            #print(fire_matrix[i])
+    return fire_matrix
+
 def get_fire_neighbors(ship_map, fire_matrix, rows, cols, i, j):
     total_fire_neighbors = 0
-    combined_prob = 1/5*fire_matrix[i][j]
     d = len(ship_map)
     if(i>0):
         if fire_matrix[i-1][j] > 0 :
             total_fire_neighbors += 1
-            combined_prob += 1/5*fire_matrix[i-1][j]
     if(j < cols-1):
         if fire_matrix[i][j+1] > 0:
             total_fire_neighbors += 1
-            combined_prob += 1/5*fire_matrix[i][j+1]
     if(j > 0):
         if fire_matrix[i][j-1] > 0:
             total_fire_neighbors += 1
-            combined_prob += 1/5*fire_matrix[i][j-1]
     if(i < rows-1):
         if fire_matrix[i+1][j] > 0:
             total_fire_neighbors += 1
-            combined_prob += 1/5*fire_matrix[i+1][j]
-    return total_fire_neighbors, combined_prob
+    return total_fire_neighbors
