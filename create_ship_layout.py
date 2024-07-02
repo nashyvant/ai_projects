@@ -137,18 +137,9 @@ def create_bot_fire_button(ship_map):
     print("bot @ ", bot_coord, " button @ ", button_coord, " fire @ ", fire_coord)
     return bot_coord, button_coord, fire_coord
 
-def create_dist_matrix(ship_map, bot_coord, button_coord, fire_coord):
-    row = len(ship_map)
-    col = len(ship_map[0])
-    dist_matrix = [[0 for i in range(col)] for j in range(row)]
-    for i in range(row):
-        for j in range(col):
-            dist_matrix[i][j] = round(abs(button_coord[0]-i)+abs(button_coord[1]-j),2)#manhattan distance
-    return dist_matrix
-
-def create_fire_matrix(ship_map, fire_coord):
-    row = len(ship_map)
-    col = len(ship_map[0])
+def create_fire_matrix(d, fire_coord):
+    row = d
+    col = d
     fire_matrix = [[0 for i in range(col)] for j in range(row)]
     fire_matrix[fire_coord[0]][fire_coord[1]] = 1
     return fire_matrix
@@ -160,32 +151,26 @@ def update_fire_matrix(ship_map, fire_matrix, q):
 
     for i in range(row):
         for j in range(col):
-            if(ship_map[i][j] == 1 and fire_matrix[i][j] == 0):
+            if(ship_map[i][j] == 1):
                 K = 0
-                if(i>0 and (ship_map[i-1][j] == 1 or ship_map[i-1][j] == -1)):
-                    #print("fire_matrix[i-1][j]", fire_matrix[i-1][j])
-                    if(fire_matrix[i-1][j] > 0):
-                        K += 1
-                if(j < col-1 and (ship_map[i][j+1] == 1 or ship_map[i][j+1] == -1 )):
-                    #print("fire_matrix[i][j+1]", fire_matrix[i][j+1])
-                    if fire_matrix[i][j+1] > 0:
-                        K += 1
-                if(j > 0 and (ship_map[i][j-1] == 1 or ship_map[i][j-1] == -1)):
-                    #print("fire_matrix[i][j-1]", fire_matrix[i][j-1])
-                    if fire_matrix[i][j-1] > 0:
-                        K += 1
-                if(i < row-1 and (ship_map[i+1][j] == 1 or ship_map[i+1][j] == -1)):
-                    #print("fire_matrix[i+1][j]", fire_matrix[i+1][j])
-                    if fire_matrix[i+1][j] > 0:
-                        K += 1 
+                if(i>0 and ship_map[i-1][j] == -1):
+                    K += 1
+                if(j < col-1 and ship_map[i][j+1] == -1 ):
+                    K += 1
+                if(j > 0 and ship_map[i][j-1] == -1):
+                    K += 1
+                if(i < row-1 and ship_map[i+1][j] == -1):
+                    K += 1 
                 #print("K: ", K)
                 curr_fire_probability = round(1 - math.pow((1 - q), K), 2)
                 #print("fire_matrix[", i,"][", j, "] = ", fire_matrix[i][j])
                 new_fire_matrix[i][j] = sample_bit(curr_fire_probability)
+                if(new_fire_matrix[i][j] == 1): # cell sets on fire
+                    ship_map[i][j] = -1
     fire_matrix = new_fire_matrix
-    #print("updated fire matrix")
-    #for i in range(0, len(fire_matrix)):
-        #print(fire_matrix[i])
+    #print("updated ship matrix with fire")
+    #for i in range(0, len(ship_map)):
+        #print(ship_map[i])
     return fire_matrix
 
 def simulate_fire_matrix(ship_map, fire_matrix, q, steps):
@@ -196,27 +181,17 @@ def simulate_fire_matrix(ship_map, fire_matrix, q, steps):
     while(steps):
         for i in range(row):
             for j in range(col):
-                if(ship_map[i][j] == 1 and fire_matrix[i][j] == 0 ):
+                if(ship_map[i][j] == 1):
                     K = 0
-                    if(i>0 and (ship_map[i-1][j] == 1 or ship_map[i-1][j] == -1)):
-                        #print("fire_matrix[i-1][j]", fire_matrix[i-1][j])
-                        if(fire_matrix[i-1][j] > 0):
-                            K += 1
-                    if(j < col-1 and (ship_map[i][j+1] == 1 or ship_map[i][j+1] == -1 )):
-                        #print("fire_matrix[i][j+1]", fire_matrix[i][j+1])
-                        if fire_matrix[i][j+1] > 0:
-                            K += 1
-                    if(j > 0 and (ship_map[i][j-1] == 1 or ship_map[i][j-1] == -1)):
-                        #print("fire_matrix[i][j-1]", fire_matrix[i][j-1])
-                        if fire_matrix[i][j-1] > 0:
-                            K += 1
-                    if(i < row-1 and (ship_map[i+1][j] == 1 or ship_map[i+1][j] == -1)):
-                        #print("fire_matrix[i+1][j]", fire_matrix[i+1][j])
-                        if fire_matrix[i+1][j] > 0:
-                            K += 1 
-                    #print("K: ", K)
+                    if(i>0 and ship_map[i-1][j] == -1):
+                        K += 1
+                    if(j < col-1 and ship_map[i][j+1] == -1 ):
+                        K += 1
+                    if(j > 0 and ship_map[i][j-1] == -1):
+                        K += 1
+                    if(i < row-1 and ship_map[i+1][j] == -1):
+                        K += 1 
                     curr_fire_probability = round(1 - math.pow((1 - q), K), 2)
-                    #print("fire_matrix[", i,"][", j, "] = ", fire_matrix[i][j])
                     new_fire_matrix[i][j] = sample_bit(curr_fire_probability)
         fire_matrix = new_fire_matrix
         steps -= 1
@@ -224,20 +199,3 @@ def simulate_fire_matrix(ship_map, fire_matrix, q, steps):
         #for i in range(0, len(fire_matrix)):
             #print(fire_matrix[i])
     return fire_matrix
-
-def get_fire_neighbors(ship_map, fire_matrix, rows, cols, i, j):
-    total_fire_neighbors = 0
-    d = len(ship_map)
-    if(i>0):
-        if fire_matrix[i-1][j] > 0 :
-            total_fire_neighbors += 1
-    if(j < cols-1):
-        if fire_matrix[i][j+1] > 0:
-            total_fire_neighbors += 1
-    if(j > 0):
-        if fire_matrix[i][j-1] > 0:
-            total_fire_neighbors += 1
-    if(i < rows-1):
-        if fire_matrix[i+1][j] > 0:
-            total_fire_neighbors += 1
-    return total_fire_neighbors
