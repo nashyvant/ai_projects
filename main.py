@@ -2,6 +2,7 @@
 import heapq
 import sys
 import copy
+import random
 
 from create_ship_layout import init, create_ship_layout, open_dead_end, create_bot_fire_button
 from create_ship_layout import create_fire_matrix, simulate_fire_matrix, update_fire_matrix
@@ -28,25 +29,58 @@ q = float(q)
 '''
 #project 1 - bot turns off fire
 # init the 2D map of ship
-if len(sys.argv) != 3:
-    print("Usage: python main.py <integer_arg> <float_arg>")
+if len(sys.argv) != 2:
+    print("Usage: python main.py <float_arg>")
 
 # Retrieve command-line arguments
-d = int(sys.argv[1])
-q = float(sys.argv[2])
+#d = 40 #fixed grid size
+d = 21
+q = float(sys.argv[1])
 
 MAX_ITERATIONS = d*d*2
 
 print("Automating for q: ", q, " d: ", d)
 
-ship_map = init(d, q)
-create_ship_layout(ship_map)
-open_dead_end(ship_map)
-print("ship layout after opening dead ends:")
+#ship_map = init(d, q)
+#create_ship_layout(ship_map)
+#open_dead_end(ship_map)
+
+ship_map = [
+    [1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+    [0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+    [1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1],
+    [1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1],
+    [1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+    [1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1],
+    [1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1],
+    [1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
+    [1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0],
+    [1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1],
+    [1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1],
+    [0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+    [1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1],
+    [1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1],
+    [1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1],
+    [1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1],
+    [0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0]
+]
+
+#bot_coord, button_coord, fire_coord = create_bot_fire_button(ship_map)
+fire_coord = (0, 11)
+bot_coord = (9, 0 )
+button_coord = (17, 17)  
+
+ship_map[fire_coord[0]][fire_coord[1]] = -1
+
+print("ship layout with init fire cell:")
 for i in range(0, len(ship_map)):
     print(ship_map[i])
-bot_coord, button_coord, fire_coord = create_bot_fire_button(ship_map)
-ship_map[fire_coord[0]][fire_coord[1]] = -1
+
+print("bot @ ", bot_coord, " button @ ", button_coord, " fire @ ", fire_coord)
 
 rows = len(ship_map)
 cols = len(ship_map[0])
@@ -70,21 +104,16 @@ def a_star(ship_map, start, goal, fire_matrix, bot_num):
     est_total_cost = {start : heuristic(start, goal)}
     prev_cell = ()
     loop_count = 0
-    if(bot_num == 3):
-        sim_fire_matrix = copy.deepcopy(fire_matrix)
-        sim_fire_matrix = simulate_fire_matrix(ship_map, sim_fire_matrix, q, 1)
+    if(bot_num == 3): #simulate adjacent fire cells
+        sim_fire_matrix = simulate_fire_matrix(ship_map, fire_matrix, q, 1)
     
     while myheap:
-        if loop_count >= MAX_ITERATIONS:
-            print("MAX iterations reached. EXIT!")
-            return "false"
-        
         curr_cell = heapq.heappop(myheap)
         if(curr_cell == prev_cell):
             continue
         
         if(curr_cell[1] == button_coord):
-            print("bot finds path to button! ")
+            #print("bot finds path to button! ")
             return get_path(parent, curr_cell[1])
     
         i = curr_cell[1][0]
@@ -93,7 +122,7 @@ def a_star(ship_map, start, goal, fire_matrix, bot_num):
 
         for x, y in DIRECTIONS:
             neighbor = (curr_cell[1][0]+x, curr_cell[1][1]+y)
-            if (0 <= neighbor[0] < d and 0 <= neighbor[1] < d) and (ship_map[neighbor[0]][neighbor[1]] == 1): #ignores fire cells
+            if (0 <= neighbor[0] < d and 0 <= neighbor[1] < d) and (ship_map[neighbor[0]][neighbor[1]] == 1): #ignores fire and block cells
                 if(bot_num == 1 or bot_num == 2):
                     est_curr_cost = cost[curr_cell[1]]+1
                 else:
@@ -109,7 +138,7 @@ def a_star(ship_map, start, goal, fire_matrix, bot_num):
                     heapq.heappush(myheap, (est_total_cost[neighbor], neighbor))
                     #print("neighbor:", neighbor, "est curr and total cost of neighbor is: ", est_curr_cost, est_total_cost[neighbor])
 
-        #print(myheap)
+        print(myheap)
         prev_cell = curr_cell
         loop_count += 1
     return None
@@ -120,9 +149,10 @@ def run_bot(ship_map, bot_coord, button_coord, fire_coord, bot_num):
         path = a_star(ship_map, bot_coord, button_coord, fire_matrix, bot_num)
         if path is None:
             if(bot_num == 3): # try again by avoiding only current fire cells for bot #3
+                print("BOT_NUM 3; No Path. Try only with current fire cells!")
                 path = a_star(ship_map, bot_coord, button_coord, fire_matrix, 2) # which is the same as running bot2
                 if path is None:
-                    print("No Path. Fire has spread to the button cell or bot cell!")
+                    print("No Path. Fire has spread to the button cell or bot cell! ")
                     return 0
                 else:
                     print(f"Path to button: {path}")
