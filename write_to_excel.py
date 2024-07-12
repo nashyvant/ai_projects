@@ -2,8 +2,8 @@ import pandas as pd
 
 # Define the input text files and output Excel file
 #input_files = ['output1.txt', 'output2.txt', 'output3.txt', 'output4.txt', 'output5.txt' ]
-input_files = ['out.txt']
-output_file = 'output.xlsx'
+input_files = ['mouse_out.txt']
+output_file = 'mouse_output.xlsx'
 
 # Initialize an empty list to store the parsed data
 all_data = []

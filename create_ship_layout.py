@@ -8,7 +8,7 @@ from utility import sample_bit
 ####################################################################
 ######## creates DxD matrix with user's input ######################
 ####################################################################
-def init(d, q):
+def init(d):
     #d = input("Enter row or column size D?")
     #d = int(d)
     #q = input("Enter q between 0 and 1, defining flammability of the ship?")
@@ -23,6 +23,28 @@ def init(d, q):
     ship_map[random_row][random_col] = 1
     #print(ship_map)
     return ship_map
+
+####################################################################
+######## creates DxD matrix with probabilitic knowledge base of ####
+######## where the mouse is ########################################
+####################################################################
+def create_pkb(ship_map):
+    row, col = (len(ship_map), len(ship_map[0]))
+    num_open_cells = 0
+    for i in range(0, len(ship_map)):
+        for j in range(0, len(ship_map[i])):
+            if(ship_map[i][j] == 1):
+                num_open_cells += 1
+    print("num of open cells:", num_open_cells)
+    uniform_dist = 1/(num_open_cells*num_open_cells)
+    pkb = [[uniform_dist for i in range(col)] for j in range(row)]
+
+    for i in range(0, len(pkb)):
+        for j in range(0, len(pkb[i])):
+            if(ship_map[i][j] == 0):
+                pkb[i][j] = 0
+
+    return pkb
 
 ####################################################################
 ######## creates the initial ship layout ###########################

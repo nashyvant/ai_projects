@@ -2,11 +2,12 @@
 import heapq
 import sys
 import copy
-import random
 
 from create_ship_layout import init, create_ship_layout, open_dead_end, create_bot_fire_button
 from create_ship_layout import create_fire_matrix, simulate_fire_matrix, update_fire_matrix
 #from utility import weight
+from utility import get_path
+
 from datetime import datetime
 
 # Get the current date and time
@@ -41,7 +42,7 @@ MAX_ITERATIONS = d*d*2
 
 print("Automating for q: ", q, " d: ", d)
 
-#ship_map = init(d, q)
+#ship_map = init(d)
 #create_ship_layout(ship_map)
 #open_dead_end(ship_map)
 
@@ -84,14 +85,6 @@ print("bot @ ", bot_coord, " button @ ", button_coord, " fire @ ", fire_coord)
 
 rows = len(ship_map)
 cols = len(ship_map[0])
-
-def get_path(parent, curr):
-    complete_path = [curr]
-    while curr in parent:
-        curr = parent[curr]
-        complete_path.append(curr)
-    complete_path.reverse()
-    return complete_path
 
 def heuristic(a, b):
     return round((abs(a[0] - b[0]) + abs(a[1] - b[1])), 2)
@@ -146,7 +139,7 @@ def a_star(ship_map, start, goal, fire_matrix, bot_num):
 def run_bot(ship_map, bot_coord, button_coord, fire_coord, bot_num):
     fire_matrix = create_fire_matrix(len(ship_map), fire_coord)
     while( True):
-        path = a_star(ship_map, bot_coord, button_coord, fire_matrix, bot_num)
+        path, steps = a_star(ship_map, bot_coord, button_coord, fire_matrix, bot_num)
         if path is None:
             if(bot_num == 3): # try again by avoiding only current fire cells for bot #3
                 print("BOT_NUM 3; No Path. Try only with current fire cells!")
