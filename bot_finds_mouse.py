@@ -24,8 +24,7 @@ print("Current Date and Time:", current_time)
 DIRECTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
 d = int(40)
-alpha = 0.4
-
+#alpha = 0.4
 
 #project 2 - bot finds mouse
 # init the 2D map of ship
@@ -34,13 +33,21 @@ if len(sys.argv) != 2:
     print("Usage: python main.py <float_arg>")
 
 alpha = float(sys.argv[1])
-
 print("Automating for alpha: ", alpha, " d: ", d)
 
 '''
 ship_map = init(d)
 create_ship_layout(ship_map)
 open_dead_end(ship_map)
+
+ship_map = [
+    [1, 1, 1, 1, 1, 1],
+[1, 1, 1, 1, 1, 1],
+[1, 1, 1, 0, 0, 1],
+[1, 0, 1, 1, 1, 1],
+[1, 1, 0, 1, 0, 1],
+[1, 0, 0, 0, 1, 1]
+]
 '''
 ship_map = [
     [0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1],
@@ -90,6 +97,8 @@ pkb = create_pkb(ship_map)
 #bot_coord, mouse_coord, __notneeded = create_bot_fire_button(ship_map)
 bot_coord = (9, 34)  
 mouse_coord = (16, 17)
+#bot_coord = (2, 0) 
+#mouse_coord = (3, 0)
 
 '''
 fire_coord = (0, 11)
@@ -136,14 +145,13 @@ def update_pkb(bot_coord, is_beep):
     for i in range(0, len(pkb)):
         for j in range(0, len(pkb[i])):
             pkb[i][j] = round(pkb[i][j]/sum, 8)
+    
     return
-
 '''
     print("Normalized PKB")
     for i in range(0, len(pkb)):
         print(pkb[i])
 '''
-
 def mouse_sensor(bot_coord):
     d = heuristic(bot_coord, mouse_coord)
     beep_prob = math.exp(-alpha*(d-1))
@@ -157,27 +165,40 @@ def sense(bot_coord):
 def get_max_likelihood_neighbor(bot_coord):
     new_bot_coord = []
     max_prob = 0
-    for x, y in DIRECTIONS:
+    for x, y in DIRECTIONS: #first get the max P
         neighbor = (bot_coord[0]+x, bot_coord[1]+y)
         if (0 <= neighbor[0] < d and 0 <= neighbor[1] < d) and (ship_map[neighbor[0]][neighbor[1]] == 1): #ignores fire and block cells
             if(pkb[neighbor[0]][neighbor[1]] > max_prob):
-                max_prob = pkb[neighbor[0]][neighbor[1]]
-                new_bot_coord.append(neighbor)
-            elif(max_prob > 0 and pkb[neighbor[0]][neighbor[1]] == max_prob):
-                new_bot_coord.append(neighbor)
+                max_prob = pkb[neighbor[0]][neighbor[1]] #gets the max P across 4 neighbors
 
+    for x, y in DIRECTIONS: #now get all the neighbors with the same max probability
+        neighbor = (bot_coord[0]+x, bot_coord[1]+y)  
+        if (0 <= neighbor[0] < d and 0 <= neighbor[1] < d) and (ship_map[neighbor[0]][neighbor[1]] == 1): #ignores fire and block cells
+            if(pkb[neighbor[0]][neighbor[1]]  == max_prob):
+                new_bot_coord.append(neighbor)
+                
+    #print("number of max likelihood neighbors: ", new_bot_coord)
     r = random.randint(0, len(new_bot_coord)-1)
+    #print("picking neighbor:", new_bot_coord[r])
     return new_bot_coord[r]
 
 def get_overall_max_likelihood_coord(bot_coord):
-    new_bot_coord = bot_coord
+    new_bot_coord = []
     max_prob = pkb[bot_coord[0]][bot_coord[1]]
     for i in range(0, len(pkb)):
         for j in range(0, len(pkb[i])):
             if(pkb[i][j] > max_prob):
-                max_prob = pkb[i][j]
-                new_bot_coord = (i, j)
-    return new_bot_coord
+                max_prob = pkb[i][j] #gets the max P
+
+    for i in range(0, len(pkb)):
+        for j in range(0, len(pkb[i])):
+            if(pkb[i][j] == max_prob):
+                new_bot_coord.append((i, j))
+
+    #print("number of overall max likelihood cells: ", new_bot_coord)
+    r = random.randint(0, len(new_bot_coord)-1)
+    #print("picking max P cell:", new_bot_coord[r])
+    return new_bot_coord[r]
 
 def a_star(ship_map, start, goal):
     myheap = []
@@ -223,10 +244,10 @@ def run_bot(ship_map, bot_coord, mouse_coord, bot_num):
 
         is_beep = sense(bot_coord)
         print("At ", bot_coord, " bot beeped:", is_beep)
-        total_actions += 1 # for sensing
+        total_actions = total_actions+1 # for sensing
         next_bot_coord = get_overall_max_likelihood_coord(bot_coord)
         if(next_bot_coord == bot_coord): # need new coordinates so looking for neighbors
-            print("new coords same as old bot cords", next_bot_coord, bot_coord)
+            #print("new coords same as old bot cords", next_bot_coord, bot_coord)
             next_bot_coord = get_max_likelihood_neighbor(bot_coord)
 
         path, steps = a_star(ship_map, bot_coord, next_bot_coord)
@@ -238,10 +259,17 @@ def run_bot(ship_map, bot_coord, mouse_coord, bot_num):
         
         if(bot_num == 1):
             bot_coord = next_bot_coord
-            total_actions += steps
+            total_actions = total_actions + steps
         if(bot_num == 2):
-            bot_coord = path[1]
-            total_actions += 1 # move one step
+            k = 1
+            while(k < len(path) and pkb[path[k][0]][path[k][1]] <= 0):
+                #print("Skip sensing bot_coord: ", path[k], " its PKB is:", pkb[path[k][0]][path[k][1]])
+                k  = k+1
+            bot_coord = path[k]
+            total_actions = total_actions+1+(k-1) # move one step
+
+        #print("total actions:", total_actions)
+            
         
 print("----------------------BOT1---------------------------------------------------------------------")
 backup_pkb = copy.deepcopy(pkb)
@@ -270,4 +298,4 @@ print("bot3 mission:", mission_success_3)
 print("-----------------------------ALL DONE----------------------------------------------------------")
 # Open a file in append mode ('a')
 with open('mouse_out.txt', 'a') as file:
-    file.write(f"alpha: {alpha:0.2f}, d: {d}, bot1: {mission_success_1}, bot1_actions: {total_actions_1}, bot2: {mission_success_2}, bot2_actions: {total_actions_2}\n")
+    file.write(f"alpha: {alpha:0.2f}, d: {d}, bot1_actions: {total_actions_1}, bot2_actions: {total_actions_2}\n")
