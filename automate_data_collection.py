@@ -1,4 +1,7 @@
 import subprocess
+#import shared
+import torch
+#import shared_tensors
 
 def float_range(start, end, step):
     while start < end:
@@ -23,6 +26,3 @@ for alpha in float_range(0.1, 1, 0.1):
     for i in range(0, 100):
         subprocess.run(["python", "bot_finds_mouse.py", str(alpha)])
 '''
-#project 3
-subprocess.run(["python", "bot_finds_mouse_dataset.py", "0.4"])
-             
