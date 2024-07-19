@@ -113,8 +113,6 @@ def get_path(parent, curr):
     return complete_path, steps
 
 pkb = create_pkb(ship_map)
-
-bot_coord = (9, 34)
 mouse_coord = (16, 17)
 
 rows = len(ship_map)
@@ -125,8 +123,6 @@ def print_bot_map(bot_coord):
     bot_map = [[0 for i in range(d)] for j in range(d)]
     bot_map[bot_coord[0]][bot_coord[1]] = 1
     return bot_map
-    for i in range(0, d):
-        print(bot_map[i])
 
 def heuristic(a, b):
     return round((abs(a[0] - b[0]) + abs(a[1] - b[1])), 8)
@@ -215,12 +211,11 @@ def a_star(ship_map, start, goal):
     while myheap:
         curr_cell = heapq.heappop(myheap)
         if(curr_cell[1] == goal):
-            #print("bot finds path to button! ")
             return get_path(parent, curr_cell[1])
 
         i = curr_cell[1][0]
         j = curr_cell[1][1]
-        #print("processing i:", i, "j: ", j)
+       
 
         for x, y in DIRECTIONS:
             neighbor = (curr_cell[1][0]+x, curr_cell[1][1]+y)
@@ -232,9 +227,7 @@ def a_star(ship_map, start, goal):
                     cost[neighbor] = est_curr_cost
                     est_total_cost[neighbor] = est_curr_cost+heuristic(neighbor, goal)
                     heapq.heappush(myheap, (est_total_cost[neighbor], neighbor))
-                    #print("neighbor:", neighbor, "est curr and total cost of neighbor is: ", est_curr_cost, est_total_cost[neighbor])
-
-        #print(myheap)
+                    
     return None, 0
 
 def run_bot(ship_map, bot_coord, mouse_coord, alpha, bot_num):
@@ -242,9 +235,7 @@ def run_bot(ship_map, bot_coord, mouse_coord, alpha, bot_num):
     global input_data
     global output_data
     while(True):
-
         bot_map = print_bot_map(bot_coord)
-
         # Stack the matrices into a 3x40x40 tensor
         input_tensor = np.stack((ship_map, pkb, bot_map), axis = 0)
         # Store the input tensor
@@ -342,9 +333,11 @@ def float_range(start, end, step):
 print("----------------------BOT2---------------------------------------------------------------------")
 
 for alpha in float_range(0.1, 1, 0.1):
-    for i in range(0, 1):
+    for i in range(0, 20):
+        pkb = create_pkb(ship_map)
+        bot_coord = (9, 34)
+        mouse_coord = (16, 17)
         mission_success_2, total_actions_2 = run_bot(ship_map, bot_coord, mouse_coord, alpha, 2)
-        
         print("alpha is: ", alpha, " D is:", d)
         print("bot @ ", bot_coord, " mouse @ ", mouse_coord)
         print("bot2 mission:", mission_success_2, "total # of actions", total_actions_2)
@@ -353,12 +346,5 @@ for alpha in float_range(0.1, 1, 0.1):
 input_data = torch.stack(input_data)
 output_data = torch.tensor(output_data, dtype=torch.long)  # Make sure this is of type long
 
-torch.save(input_data, 'input_train_data_set.pt')
-torch.save(output_data, 'output_train_data_set.pt')
-
-# Load tensors from files
-input_data = torch.load('input_train_data_set.pt')
-output_data = torch.load('output_train_data_set.pt')
-
-print(input_data.shape)  # Should print: torch.Size([len(input_data), 3, 40, 40])
-print(output_data.shape)  # Should print: torch.Size([len(input_data)])
+torch.save(input_data, 'input_test_data_set.pt')
+torch.save(output_data, 'output_test_data_set.pt')
