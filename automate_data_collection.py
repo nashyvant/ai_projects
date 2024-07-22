@@ -20,9 +20,8 @@ for q in float_range(0.1, 1, 0.1):
         else:
              for i in range(0, 150):
                  subprocess.run(["python", "main.py", str(q)])
-
+'''
 #project 2
 for alpha in float_range(0.1, 1, 0.1):
-    for i in range(0, 100):
+    for i in range(0, 10):
         subprocess.run(["python", "bot_finds_mouse.py", str(alpha)])
-'''

@@ -97,14 +97,6 @@ pkb = create_pkb(ship_map)
 #bot_coord, mouse_coord, __notneeded = create_bot_fire_button(ship_map)
 bot_coord = (9, 34)  
 mouse_coord = (16, 17)
-#bot_coord = (2, 0) 
-#mouse_coord = (3, 0)
-
-'''
-fire_coord = (0, 11)
-mouse_coord = (9, 0 )
-button_coord = (17, 17)  
-'''
 
 print("ship layout with bot and mouse:")
 for i in range(0, len(ship_map)):
@@ -279,22 +271,11 @@ print("----------------------BOT2-----------------------------------------------
 pkb = copy.deepcopy(backup_pkb) #restore original PKB
 mission_success_2, total_actions_2 = run_bot(ship_map, bot_coord, mouse_coord, 2)
 
-'''
-print("----------------------BOT3---------------------------------------------------------------------")
-pkb = copy.deepcopy(backup_pkb) #restore original ship layout
-mission_success_3 = run_bot(ship_map, bot_coord, button_coord, fire_coord, 3)
-print("-----------------------------------------------------------------------------------------------")
-
-'''
-
 print("alpha is: ", alpha, " D is:", d)
 print("bot @ ", bot_coord, " mouse @ ", mouse_coord)
 print("bot1 mission:", mission_success_1, "total # of actions", total_actions_1)
 print("bot2 mission:", mission_success_2, "total # of actions", total_actions_2)
 
-'''
-print("bot3 mission:", mission_success_3)
-'''
 print("-----------------------------ALL DONE----------------------------------------------------------")
 # Open a file in append mode ('a')
 with open('mouse_out.txt', 'a') as file:

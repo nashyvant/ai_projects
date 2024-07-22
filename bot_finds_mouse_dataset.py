@@ -86,7 +86,7 @@ def create_pkb(ship_map):
             if(ship_map[i][j] == 1):
                 num_open_cells += 1
     print("num of open cells:", num_open_cells)
-    uniform_dist = 1/(num_open_cells*num_open_cells)
+    uniform_dist = 1/(num_open_cells)
     pkb = [[uniform_dist for i in range(col)] for j in range(row)]
 
     for i in range(0, len(pkb)):
@@ -333,7 +333,7 @@ def float_range(start, end, step):
 print("----------------------BOT2---------------------------------------------------------------------")
 
 for alpha in float_range(0.1, 1, 0.1):
-    for i in range(0, 20):
+    for i in range(0, 12):
         pkb = create_pkb(ship_map)
         bot_coord = (9, 34)
         mouse_coord = (16, 17)
@@ -346,5 +346,5 @@ for alpha in float_range(0.1, 1, 0.1):
 input_data = torch.stack(input_data)
 output_data = torch.tensor(output_data, dtype=torch.long)  # Make sure this is of type long
 
-torch.save(input_data, 'input_test_data_set.pt')
-torch.save(output_data, 'output_test_data_set.pt')
+torch.save(input_data, 'input_train_data_set.pt')
+torch.save(output_data, 'output_train_data_set.pt')

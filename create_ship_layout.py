@@ -36,7 +36,7 @@ def create_pkb(ship_map):
             if(ship_map[i][j] == 1):
                 num_open_cells += 1
     print("num of open cells:", num_open_cells)
-    uniform_dist = 1/(num_open_cells*num_open_cells)
+    uniform_dist = 1/(num_open_cells)
     pkb = [[uniform_dist for i in range(col)] for j in range(row)]
 
     for i in range(0, len(pkb)):
