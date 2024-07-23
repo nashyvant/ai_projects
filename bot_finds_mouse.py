@@ -24,6 +24,7 @@ print("Current Date and Time:", current_time)
 DIRECTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
 d = int(40)
+#alpha = 0.4
 
 #project 2 - bot finds mouse
 # init the 2D map of ship
@@ -38,6 +39,15 @@ print("Automating for alpha: ", alpha, " d: ", d)
 ship_map = init(d)
 create_ship_layout(ship_map)
 open_dead_end(ship_map)
+
+ship_map = [
+    [1, 1, 1, 1, 1, 1],
+[1, 1, 1, 1, 1, 1],
+[1, 1, 1, 0, 0, 1],
+[1, 0, 1, 1, 1, 1],
+[1, 1, 0, 1, 0, 1],
+[1, 0, 0, 0, 1, 1]
+]
 '''
 ship_map = [
     [0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1],

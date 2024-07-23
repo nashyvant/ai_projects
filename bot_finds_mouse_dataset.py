@@ -1,5 +1,4 @@
 <<<<<<< HEAD
-<<<<<<< HEAD
 # importing "heapq" to implement heap queue
 import heapq
 import sys
@@ -351,8 +350,6 @@ output_data = torch.tensor(output_data, dtype=torch.long)  # Make sure this is o
 torch.save(input_data, 'input_test_data_set.pt')
 torch.save(output_data, 'output_test_data_set.pt')
 =======
-=======
->>>>>>> main
 # importing "heapq" to implement heap queue
 import heapq
 import sys
@@ -702,9 +699,5 @@ input_data = torch.stack(input_data)
 output_data = torch.tensor(output_data, dtype=torch.long)  # Make sure this is of type long
 
 torch.save(input_data, 'input_train_data_set.pt')
-<<<<<<< HEAD
 torch.save(output_data, 'output_train_data_set.pt')
 >>>>>>> a10dcb3 (clean up for project 2 and project 3)
-=======
-torch.save(output_data, 'output_train_data_set.pt')
->>>>>>> main
