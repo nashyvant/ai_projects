@@ -51,7 +51,7 @@ The bot is responsible for the safety and security of the ship while the crew is
  
  The PyTorch solution for the trained model is in model_predict_bot_moves.ipynb.
  
- The trained model is 72% accurate on training data and 67% accurate of test data. 
+ The trained model is 72% accurate on training data and 67% accurate on test data. 
 	
 	
  
